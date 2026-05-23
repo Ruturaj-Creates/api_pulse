@@ -6,7 +6,38 @@ Built step-by-step with **FastAPI**, **PostgreSQL**, **SQLAlchemy**, and **Alemb
 
 ---
 
-## Step 2 — Database (current)
+## Step 3 — Authentication (current)
+
+You have:
+
+- `POST /api/v1/auth/register` — create account
+- `POST /api/v1/auth/login` — get JWT (form: username=email, password=...)
+- `GET /api/v1/auth/me` — protected, requires Bearer token
+
+### Quick test (Swagger)
+
+1. Open http://localhost:8000/docs
+2. **POST /api/v1/auth/register** with `{"email":"you@example.com","password":"secret123"}`
+3. **POST /api/v1/auth/login** — click "Try it out", use `username` = your email, `password` = secret123
+4. Copy `access_token`, click **Authorize**, paste token
+5. **GET /api/v1/auth/me** — should return your user
+
+### Quick test (curl)
+
+```powershell
+# Register
+curl -X POST http://localhost:8000/api/v1/auth/register -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"secret123\"}"
+
+# Login (note: form-urlencoded, username field = email)
+curl -X POST http://localhost:8000/api/v1/auth/login -d "username=test@example.com&password=secret123"
+
+# Me (replace TOKEN)
+curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer TOKEN"
+```
+
+---
+
+## Step 2 — Database
 
 You have:
 
@@ -97,7 +128,8 @@ git commit -m "chore: scaffold API Pulse with FastAPI, config, and Docker Postgr
 | Step | Topic |
 |------|--------|
 | 2 | Database — SQLAlchemy models, async session, Alembic ✅ |
-| 3 | Authentication — register, login, JWT ← next |
+| 3 | Authentication — register, login, JWT ✅ |
+| 4 | Endpoints CRUD — add URLs to monitor ← next |
 | 4 | Endpoints CRUD — users add URLs to monitor |
 | 5 | Health checker — httpx + background scheduler |
 | 6 | Monitoring logs & alerts |

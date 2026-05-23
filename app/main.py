@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.db.session import check_database_connection, engine
 
@@ -52,6 +53,9 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
         lifespan=lifespan,
     )
+
+    # Versioned API routes (auth, endpoints, dashboard — added step by step)
+    app.include_router(api_router, prefix=settings.api_v1_prefix)
 
     # CORS: allows a future frontend (React, etc.) to call this API
     app.add_middleware(
