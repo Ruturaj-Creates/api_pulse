@@ -1,0 +1,29 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# Validation & settings
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# Auth (used in a later step)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# HTTP client for health checks (used in a later step)
+httpx==0.28.1
+
+# Background scheduler (used in a later step)
+apscheduler==3.10.4
+
+# Email (mock alerts in a later step)
+aiosmtplib==3.0.2
+
+# Dev / testing helpers
+python-multipart==0.0.20
+email-validator==2.2.0
