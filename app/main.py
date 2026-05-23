@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
+from app.db.session import check_database_connection, engine
 
 
 @asynccontextmanager
@@ -21,13 +22,21 @@ async def lifespan(app: FastAPI):
     """
     Startup / shutdown hooks.
 
-    Later we will:
-    - connect to the database on startup
-    - start the background scheduler
-  """
+    - Verifies DB on startup
+    - Disposes connection pool on shutdown
+    - Background scheduler will be added in a later step
+    """
     settings = get_settings()
     print(f"Starting {settings.app_name} ({settings.app_env})...")
+
+    if await check_database_connection():
+        print("Database connection: OK")
+    else:
+        print("WARNING: Database connection failed — check DATABASE_URL in .env")
+
     yield
+
+    await engine.dispose()
     print(f"Shutting down {settings.app_name}...")
 
 
@@ -67,10 +76,15 @@ def create_app() -> FastAPI:
         """
         Health check endpoint.
 
-        Load balancers and Docker use this to verify the app is alive.
-        We will add a database ping here in Step 2.
+        Returns 200 if the API process is up.
+        `database` is "connected" only when PostgreSQL answers SELECT 1.
         """
-        return {"status": "ok", "service": settings.app_name}
+        db_ok = await check_database_connection()
+        return {
+            "status": "ok" if db_ok else "degraded",
+            "service": settings.app_name,
+            "database": "connected" if db_ok else "disconnected",
+        }
 
     return app
 

@@ -6,13 +6,42 @@ Built step-by-step with **FastAPI**, **PostgreSQL**, **SQLAlchemy**, and **Alemb
 
 ---
 
-## Step 1 — Project foundation (current)
+## Step 2 — Database (current)
+
+You have:
+
+- SQLAlchemy models: `User`, `Endpoint`, `MonitoringLog`, `Alert`
+- Async DB session (`app/db/session.py`) with `get_db` dependency
+- Alembic migrations in `alembic/versions/`
+- `/health` reports database `connected` / `disconnected`
+
+### Run migrations (after pulling new code)
+
+```powershell
+cd e:\projects\api_pulse
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+alembic upgrade head
+```
+
+### Verify tables in PostgreSQL
+
+```sql
+\dt
+-- or in pgAdmin: api_pulse → Schemas → public → Tables
+```
+
+Expected tables: `users`, `endpoints`, `monitoring_logs`, `alerts`, `alembic_version`
+
+---
+
+## Step 1 — Project foundation
 
 You have:
 
 - FastAPI app with `/` and `/health`
 - Environment-based config (`app/core/config.py`)
-- Docker Compose for PostgreSQL
+- Docker Compose for PostgreSQL (optional if you use local Postgres)
 - `requirements.txt` and `.env.example`
 
 ### Prerequisites
@@ -39,10 +68,11 @@ pip install -r requirements.txt
 # 5. Copy environment file
 copy .env.example .env
 
-# 6. Start PostgreSQL (Docker)
-docker compose up -d
+# 6. Ensure PostgreSQL is running (local install OR: docker compose up -d)
+# 7. Apply database migrations
+alembic upgrade head
 
-# 7. Run the API
+# 8. Run the API
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -66,8 +96,8 @@ git commit -m "chore: scaffold API Pulse with FastAPI, config, and Docker Postgr
 
 | Step | Topic |
 |------|--------|
-| 2 | Database — SQLAlchemy models, async session, Alembic |
-| 3 | Authentication — register, login, JWT |
+| 2 | Database — SQLAlchemy models, async session, Alembic ✅ |
+| 3 | Authentication — register, login, JWT ← next |
 | 4 | Endpoints CRUD — users add URLs to monitor |
 | 5 | Health checker — httpx + background scheduler |
 | 6 | Monitoring logs & alerts |
