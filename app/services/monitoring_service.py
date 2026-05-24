@@ -13,6 +13,7 @@ from app.core.config import Settings, get_settings
 from app.models.endpoint import Endpoint
 from app.models.enums import EndpointStatus
 from app.models.monitoring_log import MonitoringLog
+from app.services.alert_service import create_down_alert, resolve_alerts_for_endpoint
 from app.services.health_checker import perform_health_check
 
 
@@ -53,6 +54,8 @@ async def run_health_check(
     if endpoint.status == EndpointStatus.PAUSED:
         return None
 
+    previous_status = endpoint.status
+
     result = await perform_health_check(
         endpoint,
         timeout_seconds=settings.health_check_timeout_seconds,
@@ -73,14 +76,17 @@ async def run_health_check(
     endpoint.last_checked_at = now
 
     if result.is_up:
+        if previous_status == EndpointStatus.DOWN:
+            await resolve_alerts_for_endpoint(db, endpoint, settings)
         endpoint.status = EndpointStatus.UP
         endpoint.consecutive_failures = 0
     else:
         endpoint.consecutive_failures += 1
         if endpoint.consecutive_failures >= settings.failure_threshold:
             endpoint.status = EndpointStatus.DOWN
+            if previous_status != EndpointStatus.DOWN:
+                await create_down_alert(db, endpoint, result.failure_reason, settings)
         elif endpoint.status != EndpointStatus.DOWN:
-            # Still failing but not yet marked DOWN
             endpoint.status = EndpointStatus.UNKNOWN
 
     await db.flush()

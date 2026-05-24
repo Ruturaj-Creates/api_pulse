@@ -50,7 +50,8 @@ class Settings(BaseSettings):
     scheduler_tick_seconds: int = 30
     max_concurrent_checks: int = 20
 
-    # Email alerts (mock for now)
+    # Email alerts
+    alert_email_mock: bool = True
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_from: str = "noreply@apipulse.local"

@@ -6,7 +6,42 @@ Built step-by-step with **FastAPI**, **PostgreSQL**, **SQLAlchemy**, and **Alemb
 
 ---
 
-## Step 5 — Health checker (current)
+## Step 6 — Alerts & incidents (current)
+
+When an endpoint hits `FAILURE_THRESHOLD` and goes **DOWN**:
+
+- Creates an **Alert** row in the database
+- Sends a **mock email** to the console (or real SMTP if configured)
+- Auto-resolves alerts when the endpoint recovers **UP**
+
+New routes:
+
+| Method | Path | Action |
+|--------|------|--------|
+| GET | `/api/v1/alerts` | List alerts (`?resolved=false` for open) |
+| GET | `/api/v1/alerts/{id}` | Get one alert |
+| POST | `/api/v1/alerts/{id}/resolve` | Manually resolve |
+| GET | `/api/v1/alerts/incidents/recent` | Incidents with endpoint context |
+
+### Quick test — trigger a DOWN alert
+
+1. Login → Authorize
+2. Create endpoint with wrong `expected_status_code` (e.g. `404` for GitHub zen)
+3. **POST /check** three times (or wait for scheduler)
+4. Watch terminal for `[MOCK EMAIL]` output
+5. **GET /api/v1/alerts?resolved=false** — open alert
+6. Fix `expected_status_code` to `200`, **POST /check** once
+7. **GET /api/v1/alerts** — alert should be `is_resolved: true`
+
+Optional `.env`:
+
+```env
+ALERT_EMAIL_MOCK=true
+```
+
+---
+
+## Step 5 — Health checker
 
 Background scheduler + httpx async checks:
 
@@ -192,8 +227,8 @@ git commit -m "chore: scaffold API Pulse with FastAPI, config, and Docker Postgr
 | 3 | Authentication — register, login, JWT ✅ |
 | 4 | Endpoints CRUD — add URLs to monitor ✅ |
 | 5 | Health checker — httpx + background scheduler ✅ |
-| 6 | Monitoring logs & alerts ← next |
-| 7 | Dashboard APIs |
+| 6 | Monitoring logs & alerts ✅ |
+| 7 | Dashboard APIs ← next |
 
 ---
 
