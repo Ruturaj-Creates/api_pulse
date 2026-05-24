@@ -6,7 +6,36 @@ Built step-by-step with **FastAPI**, **PostgreSQL**, **SQLAlchemy**, and **Alemb
 
 ---
 
-## Step 6 — Alerts & incidents (current)
+## Step 7 — Dashboard (current) ✅ Core complete
+
+Aggregates `monitoring_logs` and `alerts` into overview stats.
+
+| Method | Path | Returns |
+|--------|------|---------|
+| GET | `/api/v1/dashboard?hours=24` | Full account overview |
+| GET | `/api/v1/dashboard/endpoints/{id}?hours=24` | Single endpoint stats |
+
+**Metrics included:**
+
+- Uptime percentage (successful checks / total checks)
+- Average response time (ms)
+- Total failures
+- Endpoints up / down / paused / unknown
+- Open alerts count
+- Recent incidents
+
+### Quick test
+
+1. Login → Authorize
+2. Run a few **POST /check** calls on your endpoints
+3. **GET /api/v1/dashboard** — see `overall_uptime_percentage`, `endpoints[]`, `recent_incidents`
+4. **GET /api/v1/dashboard/endpoints/1?hours=24** — stats for one endpoint
+
+Query param `hours` (1–720) controls the stats window (default 24h).
+
+---
+
+## Step 6 — Alerts & incidents
 
 When an endpoint hits `FAILURE_THRESHOLD` and goes **DOWN**:
 
@@ -219,20 +248,29 @@ git commit -m "chore: scaffold API Pulse with FastAPI, config, and Docker Postgr
 
 ---
 
-## Roadmap (upcoming steps)
+## Roadmap — core build complete
 
 | Step | Topic |
 |------|--------|
-| 2 | Database — SQLAlchemy models, async session, Alembic ✅ |
-| 3 | Authentication — register, login, JWT ✅ |
-| 4 | Endpoints CRUD — add URLs to monitor ✅ |
-| 5 | Health checker — httpx + background scheduler ✅ |
-| 6 | Monitoring logs & alerts ✅ |
-| 7 | Dashboard APIs ← next |
+| 1 | Project foundation ✅ |
+| 2 | Database — SQLAlchemy, Alembic ✅ |
+| 3 | Authentication — JWT ✅ |
+| 4 | Endpoints CRUD ✅ |
+| 5 | Health checker — httpx + scheduler ✅ |
+| 6 | Alerts & incidents ✅ |
+| 7 | Dashboard APIs ✅ |
+
+### Optional extensions (not built yet)
+
+- Tags/categories for endpoints
+- Public status page
+- WebSocket live updates
+- Real SMTP / Slack / PagerDuty integrations
+- Frontend (React) dashboard
 
 ---
 
-## Project layout
+## Project layout (reference)
 
 ```
 backend/   (repo root: api_pulse)
