@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.db.session import check_database_connection, engine
+from app.workers.scheduler import start_scheduler, stop_scheduler
 
 
 @asynccontextmanager
@@ -24,8 +25,8 @@ async def lifespan(app: FastAPI):
     Startup / shutdown hooks.
 
     - Verifies DB on startup
+    - Starts background health-check scheduler
     - Disposes connection pool on shutdown
-    - Background scheduler will be added in a later step
     """
     settings = get_settings()
     print(f"Starting {settings.app_name} ({settings.app_env})...")
@@ -35,8 +36,15 @@ async def lifespan(app: FastAPI):
     else:
         print("WARNING: Database connection failed — check DATABASE_URL in .env")
 
+    start_scheduler()
+    print(
+        f"Health check scheduler: every {settings.scheduler_tick_seconds}s "
+        f"(timeout {settings.health_check_timeout_seconds}s)"
+    )
+
     yield
 
+    stop_scheduler()
     await engine.dispose()
     print(f"Shutting down {settings.app_name}...")
 

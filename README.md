@@ -6,7 +6,36 @@ Built step-by-step with **FastAPI**, **PostgreSQL**, **SQLAlchemy**, and **Alemb
 
 ---
 
-## Step 4 — Endpoint CRUD (current)
+## Step 5 — Health checker (current)
+
+Background scheduler + httpx async checks:
+
+- APScheduler runs every `SCHEDULER_TICK_SECONDS` (default 30s)
+- Checks endpoints whose interval has elapsed
+- Saves rows to `monitoring_logs`
+- Updates endpoint `status`, `last_checked_at`, `consecutive_failures`
+- Marks **DOWN** after `FAILURE_THRESHOLD` consecutive failures (default 3)
+
+New routes:
+
+| Method | Path | Action |
+|--------|------|--------|
+| POST | `/api/v1/endpoints/{id}/check` | Run check now |
+| GET | `/api/v1/endpoints/{id}/logs` | View check history |
+
+### Quick test
+
+1. Create an endpoint (Step 4) with a real URL e.g. `https://api.github.com/zen`
+2. **POST /api/v1/endpoints/{id}/check** — returns log with `is_up: true`, `response_time_ms`
+3. **GET /api/v1/endpoints/{id}** — `status` should be `"up"`, `last_checked_at` set
+4. **GET /api/v1/endpoints/{id}/logs** — history of checks
+5. Wait ~30–60s — scheduler runs automatically; more logs appear
+
+Test failure: set `expected_status_code` to `404`, call `/check` — `is_up: false`, failures increment.
+
+---
+
+## Step 4 — Endpoint CRUD
 
 Protected routes (JWT required):
 
@@ -162,8 +191,8 @@ git commit -m "chore: scaffold API Pulse with FastAPI, config, and Docker Postgr
 | 2 | Database — SQLAlchemy models, async session, Alembic ✅ |
 | 3 | Authentication — register, login, JWT ✅ |
 | 4 | Endpoints CRUD — add URLs to monitor ✅ |
-| 5 | Health checker — httpx + background scheduler ← next |
-| 6 | Monitoring logs & alerts |
+| 5 | Health checker — httpx + background scheduler ✅ |
+| 6 | Monitoring logs & alerts ← next |
 | 7 | Dashboard APIs |
 
 ---

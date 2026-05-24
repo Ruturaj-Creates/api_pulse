@@ -42,9 +42,13 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
-    # Monitoring (used in later steps)
+    # Monitoring
     default_check_interval_seconds: int = 60
     failure_threshold: int = 3
+    health_check_timeout_seconds: float = 30.0
+    health_check_max_retries: int = 1
+    scheduler_tick_seconds: int = 30
+    max_concurrent_checks: int = 20
 
     # Email alerts (mock for now)
     smtp_host: str = "localhost"
