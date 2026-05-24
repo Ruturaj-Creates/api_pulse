@@ -6,7 +6,39 @@ Built step-by-step with **FastAPI**, **PostgreSQL**, **SQLAlchemy**, and **Alemb
 
 ---
 
-## Step 3 — Authentication (current)
+## Step 4 — Endpoint CRUD (current)
+
+Protected routes (JWT required):
+
+| Method | Path | Action |
+|--------|------|--------|
+| POST | `/api/v1/endpoints` | Add URL to monitor |
+| GET | `/api/v1/endpoints` | List your endpoints |
+| GET | `/api/v1/endpoints/{id}` | Get one |
+| PATCH | `/api/v1/endpoints/{id}` | Update settings |
+| DELETE | `/api/v1/endpoints/{id}` | Delete |
+| POST | `/api/v1/endpoints/{id}/pause` | Pause checks |
+| POST | `/api/v1/endpoints/{id}/resume` | Resume checks |
+
+### Quick test (Swagger)
+
+1. Login and **Authorize** (see Step 3)
+2. **POST /api/v1/endpoints**:
+   ```json
+   {
+     "name": "GitHub Zen",
+     "url": "https://api.github.com/zen",
+     "http_method": "GET",
+     "expected_status_code": 200,
+     "check_interval_seconds": 60
+   }
+   ```
+3. **GET /api/v1/endpoints** — should list your endpoint with `"status": "unknown"`
+4. Try **GET /api/v1/endpoints/999** without owning it → **404**
+
+---
+
+## Step 3 — Authentication
 
 You have:
 
@@ -129,9 +161,8 @@ git commit -m "chore: scaffold API Pulse with FastAPI, config, and Docker Postgr
 |------|--------|
 | 2 | Database — SQLAlchemy models, async session, Alembic ✅ |
 | 3 | Authentication — register, login, JWT ✅ |
-| 4 | Endpoints CRUD — add URLs to monitor ← next |
-| 4 | Endpoints CRUD — users add URLs to monitor |
-| 5 | Health checker — httpx + background scheduler |
+| 4 | Endpoints CRUD — add URLs to monitor ✅ |
+| 5 | Health checker — httpx + background scheduler ← next |
 | 6 | Monitoring logs & alerts |
 | 7 | Dashboard APIs |
 
